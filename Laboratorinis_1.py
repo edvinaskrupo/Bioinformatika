@@ -49,9 +49,22 @@ def identify_longest_orf_pairs(seq):
     # atfiltruojame trumpesnius nei 100bp kodonus
     return [pair for pair in valid_pairs if pair[1] - pair[0] >= 100]
 
-# konvertuojame i baltymo seka
+# konvertuojame i baltymo seką
 def translate_to_protein(seq, pairs):
     proteins = []
     for start, end in pairs:
         proteins.append("".join([codons[seq[i:i+3]] for i in range(start, end, 3)]))
     return proteins
+
+# skaičiuojame kodonų ir dikodonų dažnius
+def compute_amino_acid_frequencies(protein_sequence):
+    codon_freq = defaultdict(int)
+    dicodon_freq = defaultdict(int)
+
+    for i in range(len(protein_sequence)):
+        codon_freq[protein_sequence[i]] += 1
+        if i < len(protein_sequence) - 1:
+            dicodon = protein_sequence[i:i+2]
+            dicodon_freq[dicodon] += 1
+
+    return codon_freq, dicodon_freq
