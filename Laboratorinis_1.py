@@ -1,6 +1,8 @@
 from collections import defaultdict
 from Bio import SeqIO
 from Bio.Seq import Seq
+import numpy as np
+import math
 
 # kodonu lentele
 codons = {
@@ -68,3 +70,21 @@ def compute_amino_acid_frequencies(protein_sequence):
             dicodon_freq[dicodon] += 1
 
     return codon_freq, dicodon_freq
+
+# skaičiuojame euklido atstumą
+def calculate_distance(frequencies1, frequencies2):
+    unique_codons = set(frequencies1.keys()).union(set(frequencies2.keys()))
+    return math.sqrt(sum([(frequencies1[codon] - frequencies2[codon]) ** 2 for codon in unique_codons]))
+
+# generuojame atstumo matricą
+def create_distance_matrix(protein_sequences, use_dicodon=False):
+    precomputed_freqs = [compute_amino_acid_frequencies(seq) for seq in protein_sequences]
+    matrix = []
+    for i in range(len(protein_sequences)):
+        row = []
+        for j in range(len(protein_sequences)):
+            freq1 = precomputed_freqs[i][1 if use_dicodon else 0]
+            freq2 = precomputed_freqs[j][1 if use_dicodon else 0]
+            row.append(calculate_distance(freq1, freq2))
+        matrix.append(row)
+    return matrix
