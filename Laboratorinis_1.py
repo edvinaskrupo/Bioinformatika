@@ -88,3 +88,32 @@ def create_distance_matrix(protein_sequences, use_dicodon=False):
             row.append(calculate_distance(freq1, freq2))
         matrix.append(row)
     return matrix
+
+def format_matrix_phylip(matrix, sequence_names):
+    output = [str(len(matrix))]
+    for i, name in enumerate(sequence_names):
+        row = [f"{dist:.2f}" for dist in matrix[i]]
+        output.append(f"{name} " + " ".join(row))
+    return "\n".join(output)
+
+# pagrindinė vykdymo dalis
+sequence_files = ["mamalian1.fasta", "mamalian2.fasta", "mamalian3.fasta", "mamalian4.fasta", "bacterial1.fasta", "bacterial2.fasta", "bacterial3.fasta", "bacterial4.fasta"]
+
+sequences = []
+names = []
+for fname in sequence_files:
+    for record in SeqIO.parse(fname, "fasta"):
+        names.append(record.id)
+        pairs = identify_longest_orf_pairs(str(record.seq))
+        proteins = translate_to_protein(str(record.seq), pairs)
+        sequences.extend(proteins)
+
+codon_matrix = create_distance_matrix(sequences)
+dicodon_matrix = create_distance_matrix(sequences, use_dicodon=True)
+
+# išsaugojame rezultatus PHYLIP formatu
+with open('codon_matrix.txt', 'w') as f:
+    f.write(format_matrix_phylip(codon_matrix, names))
+
+with open('dicodon_matrix.txt', 'w') as f:
+    f.write(format_matrix_phylip(dicodon_matrix, names))
